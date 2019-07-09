@@ -105,10 +105,14 @@ queue to process when calculating the statistics.
 
 Instead, we split the given duration for which statistics is required (60 seconds) into smaller windows (buckets), and
 maintain local statistics for each of these buckets. The accuracy of the local statistics depends on the size of the 
-window; smaller ones are more accurate, but it takes longer to aggregate them. Each buckets stores transactions for a
-slice of time from the epoch; it also has a start timestamp. While adding a new transactions, if it falls in a bucket
-whose timestamp is older than (transaction timestamp - duration), we reset that bucket and set its timestamp to the
-beginning of the slice corresponding to the transaction being added.
+window; smaller ones are more accurate, but it takes longer to aggregate them. Larger buckets are likely to have more
+contentions in a highly concurrent environment. Each buckets stores transactions for a slice of time from the epoch; 
+it also has a start timestamp. While adding a new transactions, if it falls in a bucket whose timestamp is older than 
+(transaction timestamp - duration), we reset that bucket and set its timestamp to the beginning of the slice 
+corresponding to the transaction being added.
+
+There are two times that are crucial to this process; the epoch time, which is used to determine the target bucket,
+and the current time, which is used to determine whether or not the target bucket is outdated and should be reset.
 
 For example, imagine the epoch is represented by 0, and we want to maintain last 30 seconds statistics. If each bucket
 size is 1 second, we have 30 buckets. If we had unlimited number of buckets of size 1, a transaction with timestamp 
@@ -117,8 +121,8 @@ an available bucket. We do that by a modulo operation that gives us (37 % 30) = 
 (0 + 1 * 37) = 37, meaning it will store transactions with timestamps in the range [37, 38).
 
 With the above approach, calculating the overall statistics is easy; we simply iterate over the buckets, and aggregate
-those buckets that have timestamp greater than or equal to (current timestamp - duration). Since there are a constant
-number of buckets, we can do this in O(1) time and memory.
+those buckets that have timestamp greater than or equal to (current timestamp - duration). Since we are reusing the 
+outdated buckets (circular array), there are only a constant number of buckets, we can do this in O(1) time and memory.
 
 In order to support concurrent updates to the buckets, an [AtomicReferenceArray](https://cr.openjdk.java.net/~iris/se/11/latestSpec/api/java.base/java/util/concurrent/atomic/AtomicReferenceArray.html)
 is used. Care if taken such that transactions and buckets are immutable. One interesting point to note is the memory
@@ -126,6 +130,15 @@ order mode used while aggregating the buckets; plain is used, which is the weake
 as if the variable was declared non-volatile. Since the same thread is not doing read and write, plain and opaque modes
 are equivalent in this case. Acquire and volatile modes provide stronger guarantees, but it doesn't seem like we need 
 that.
+
+### Kotlin, Kapt and IntelliJ
+As of this writing IntelliJ's built-in compiler does not directly support Kapt and annotation processing. You must 
+instead configure Intellij to run Gradle (or Maven) compilation as a build step before running your tests or 
+application class. This can be done by delegating IntelliJ build/run actions to Gradle completely from the following:
+```
+Preferences -> Build, Execution, Deployment -> Build Tools -> Gradle Runner
+```
+    
 
 ## Technologies Used
 * [Kotlin](https://kotlinlang.org/) - implementation language.

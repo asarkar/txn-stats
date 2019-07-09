@@ -2,6 +2,7 @@ package org.asarkar.stats
 
 import io.micronaut.context.annotation.Value
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.atomic.AtomicReferenceArray
@@ -13,7 +14,8 @@ class Statistics(
         @Value("\${stats.bucket-size-millis:100}")
         private val bucketSizeMillis: Int = 100,
         @Value("\${stats.duration-millis:60000}")
-        private val durationMillis: Long = 60000L
+        private val durationMillis: Long = 60000L,
+        private val clock: Clock
 ) {
     private val logger = LoggerFactory.getLogger(Statistics::class.java)
     private var buckets = newBuckets()
@@ -25,7 +27,7 @@ class Statistics(
     }
 
     fun update(txn: Transaction): Boolean {
-        val now = Instant.now()
+        val now = Instant.now(clock)
         if (now.isBefore(txn.timestamp)) {
             throw IllegalArgumentException("Current time: $now; ${txn.timestamp} is in the future")
         }
@@ -48,7 +50,7 @@ class Statistics(
     }
 
     fun aggregate(): Bucket {
-        val now = Instant.now()
+        val now = Instant.now(clock)
         return (0 until buckets.length())
                 // Further reading: http://gee.cs.oswego.edu/dl/html/j9mm.html
                 .map(buckets::get)

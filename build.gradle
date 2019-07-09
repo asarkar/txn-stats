@@ -36,7 +36,9 @@ dependencies {
             "org.junit.jupiter:junit-jupiter-params:$junitVersion",
             "org.assertj:assertj-core:$assertjVersion",
             "io.micronaut.test:micronaut-test-junit5:$micronautTestVersion",
-            "io.micronaut:micronaut-http-client"
+            "io.micronaut:micronaut-http-client",
+            "org.mockito:mockito-core:$mockitoVersion",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     )
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
