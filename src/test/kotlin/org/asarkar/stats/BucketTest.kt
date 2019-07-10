@@ -13,15 +13,19 @@ class BucketTest {
         val bucket = Bucket(startTime = Instant.now(), count = 1L)
         val str = objectMapper.writeValueAsString(bucket)
         val tree = objectMapper.readTree(str)
-        assertThat(tree.path("sum").textValue()).isEqualTo("0.00")
-        assertThat(tree.path("max").textValue()).isEqualTo("0.00")
-        assertThat(tree.path("min").textValue()).isEqualTo("0.00")
-        assertThat(tree.path("avg").textValue()).isEqualTo("0.00")
+        val zero = "0.00"
+        assertThat(tree.path("sum").textValue()).isEqualTo(zero)
+        assertThat(tree.path("max").textValue()).isEqualTo(zero)
+        assertThat(tree.path("min").textValue()).isEqualTo(zero)
+        assertThat(tree.path("avg").textValue()).isEqualTo(zero)
     }
 
     @Test
     fun testDeserialize() {
-        val bucket = objectMapper.readValue("""{"sum":"1.00","max":"1.00","min":"1.00","count":1,"avg":"1.00"}""", Bucket::class.java)
+        val bucket = objectMapper.readValue(
+                """{"sum":"1.00","max":"1.00","min":"1.00","count":1,"avg":"1.00"}""",
+                Bucket::class.java
+        )
         assertThat(bucket.count).isEqualTo(1)
         val one = BigDecimal("1.00")
         assertThat(bucket.sum).isEqualTo(one)
@@ -38,10 +42,11 @@ class BucketTest {
         val updated = Bucket.update(bucket, txn, txn.timestamp)
         assertThat(bucket).isNotSameAs(updated)
         assertThat(updated.count).isEqualTo(1)
-        assertThat(updated.sum).isEqualTo("10.00")
-        assertThat(updated.max).isEqualTo("10.00")
-        assertThat(updated.min).isEqualTo("10.00")
-        assertThat(updated.avg).isEqualTo("10.00")
+        val ten = BigDecimal("10.00")
+        assertThat(updated.sum).isEqualTo(ten)
+        assertThat(updated.max).isEqualTo(ten)
+        assertThat(updated.min).isEqualTo(ten)
+        assertThat(updated.avg).isEqualTo(ten)
         assertThat(updated.startTime).isEqualTo(bucket.startTime)
     }
 

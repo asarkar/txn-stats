@@ -16,6 +16,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.annotation.PostConstruct
+import javax.annotation.PreDestroy
 import javax.inject.Inject
 
 @MicronautTest(application = Application::class)
@@ -28,6 +29,11 @@ class StatsControllerTest {
     @PostConstruct
     fun postConstruct() {
         client = RxHttpClient.create(server.url)
+    }
+
+    @PreDestroy
+    fun preDestroy() {
+        client.close()
     }
 
     @Test
@@ -53,7 +59,8 @@ class StatsControllerTest {
     @Test
     fun testBadAmount() {
         try {
-            client.toBlocking().retrieve(HttpRequest.POST(TXN_URI, """{"amount": "abc", "timestamp": "2018-07-17T09:59:51.312Z"}"""))
+            client.toBlocking()
+                    .retrieve(HttpRequest.POST(TXN_URI, """{"amount": "abc", "timestamp": "2018-07-17T09:59:51.312Z"}"""))
             fail<Unit>("Shouldn't be here")
         } catch (ex: HttpClientResponseException) {
             assertThat(ex.status).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -83,7 +90,8 @@ class StatsControllerTest {
     @Test
     fun testFutureRequest() {
         try {
-            client.toBlocking().retrieve(HttpRequest.POST(TXN_URI, """{"amount": "abc", "timestamp": "2099-07-17T09:59:51.312Z"}"""))
+            client.toBlocking()
+                    .retrieve(HttpRequest.POST(TXN_URI, """{"amount": "abc", "timestamp": "2099-07-17T09:59:51.312Z"}"""))
             fail<Unit>("Shouldn't be here")
         } catch (ex: HttpClientResponseException) {
             assertThat(ex.status).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)

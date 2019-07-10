@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import javax.annotation.PostConstruct
+import javax.annotation.PreDestroy
 import javax.inject.Inject
 
 @MicronautTest(application = Application::class)
@@ -27,6 +28,11 @@ class ApplicationTest {
     @PostConstruct
     fun postConstruct() {
         client = RxHttpClient.create(server.url)
+    }
+
+    @PreDestroy
+    fun preDestroy() {
+        client.close()
     }
 
     @BeforeEach

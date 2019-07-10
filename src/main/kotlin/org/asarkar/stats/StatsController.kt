@@ -13,7 +13,7 @@ import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import org.slf4j.LoggerFactory
 
-@Controller(value = "/")
+@Controller
 class StatsController(private val stats: Statistics) {
     private val logger = LoggerFactory.getLogger(StatsController::class.java)
 
