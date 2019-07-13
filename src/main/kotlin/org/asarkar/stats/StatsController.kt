@@ -25,10 +25,7 @@ class StatsController(private val stats: Statistics) {
     @Post(TXN_URI, consumes = [MediaType.APPLICATION_JSON])
     fun updateStats(@Body txn: Transaction): HttpResponse<Unit> {
         return if (stats.update(txn)) HttpResponse.status(HttpStatus.CREATED)
-        else {
-            logger.warn("Skipped stale transaction: {}", txn)
-            HttpResponse.noContent()
-        }
+        else HttpResponse.noContent()
     }
 
     @Delete(TXN_URI)
