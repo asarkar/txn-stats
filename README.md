@@ -126,10 +126,8 @@ outdated buckets (circular array), there are only a constant number of buckets, 
 
 In order to support concurrent updates to the buckets, an [AtomicReferenceArray](https://cr.openjdk.java.net/~iris/se/11/latestSpec/api/java.base/java/util/concurrent/atomic/AtomicReferenceArray.html)
 is used. Care if taken such that transactions and buckets are immutable. One interesting point to note is the memory
-order mode used while aggregating the buckets; plain is used, which is the weakest, and has the semantics of reading 
-as if the variable was declared non-volatile. Since the same thread is not doing read and write, plain and opaque modes
-are equivalent in this case. Acquire and volatile modes provide stronger guarantees, but it doesn't seem like we need 
-that.
+order mode used while aggregating the buckets; `get` is used, which is the strongest, and has the semantics of reading 
+as if the variable was declared `volatile`.
 
 ### Kotlin, Kapt and IntelliJ
 As of this writing IntelliJ's built-in compiler does not directly support Kapt and annotation processing. You must 
