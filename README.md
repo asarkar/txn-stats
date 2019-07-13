@@ -125,7 +125,7 @@ those buckets that have timestamp greater than or equal to (current timestamp - 
 outdated buckets (circular array), there are only a constant number of buckets, we can do this in O(1) time and memory.
 
 In order to support concurrent updates to the buckets, an [AtomicReferenceArray](https://cr.openjdk.java.net/~iris/se/11/latestSpec/api/java.base/java/util/concurrent/atomic/AtomicReferenceArray.html)
-is used. Care if taken such that transactions and buckets are immutable. One interesting point to note is the memory
+is used. Care is taken such that transactions and buckets are immutable. One interesting point to note is the memory
 order mode used while aggregating the buckets; `get` is used, which is the strongest, and has the semantics of reading 
 as if the variable was declared `volatile`.
 
